@@ -37,7 +37,9 @@ ajax '/api/1/set' => sub {
         ),
     );
 
-    return {};
+    return JSON::to_json({
+         success => JSON::true,
+    });
 };
 
 =head2 /api/1/get_object
@@ -49,11 +51,128 @@ ajax '/api/1/get_object' => sub {
     content_type('application/json');
 
     my $data = get_db()->get_data(
-        'select * from history where path = ?',
+        'select dt, status from history where path = ? order by dt',
         param('path'),
     );
 
-    return JSON::to_json($data);
+    return JSON::to_json({
+         success => JSON::true,
+         result => {
+            status => $data->[-1]->{status},
+            path => param('path'),
+            history => $data,
+        }
+    });
+};
+
+=head2 /api/1/get
+
+=cut
+
+ajax '/api/1/get' => sub {
+
+    content_type('application/json');
+
+    my $sql_addition = '';
+    my @bind = ();
+    if (param('path')) {
+        $sql_addition = 'where f.path = ? or f.path like ?';
+        push @bind,
+            param('path'),
+            param('path') . ".%",
+            ;
+    }
+
+    my $data = get_db()->get_data(
+        "
+        select
+            f.path, f.status
+        from
+            history f
+        inner join
+            (select max(dt) as max_dt, path from history group by path) s
+            on
+                f.dt = s.max_dt
+                and f.path = s.path
+        $sql_addition
+        order by
+            f.path
+        ",
+        @bind,
+    );
+
+    my $status = 'ok';
+    my $objects = [];
+
+    foreach (@{$data}) {
+        if ($_->{status} ne 'ok') {
+            $status = 'fail';
+            push @{$objects}, $_;
+        }
+    }
+
+    return JSON::to_json({
+        success => JSON::true,
+        result => {
+            status => $status,
+            objects => $objects,
+        },
+    });
+};
+
+=head2 /api/1/get_all
+
+=cut
+
+ajax '/api/1/get_all' => sub {
+
+    content_type('application/json');
+
+    my $sql_addition = '';
+    my @bind = ();
+    if (param('path')) {
+        $sql_addition = 'where f.path = ? or f.path like ?';
+        push @bind,
+            param('path'),
+            param('path') . ".%",
+            ;
+    }
+
+    my $data = get_db()->get_data(
+        "
+        select
+            f.path, f.status
+        from
+            history f
+        inner join
+            (select max(dt) as max_dt, path from history group by path) s
+            on
+                f.dt = s.max_dt
+                and f.path = s.path
+        $sql_addition
+        order by
+            f.path
+        ",
+        @bind,
+    );
+
+    my $status = 'ok';
+    my $objects = [];
+
+    foreach (@{$data}) {
+        if ($_->{status} ne 'ok') {
+            $status = 'fail';
+        }
+        push @{$objects}, $_;
+    }
+
+    return JSON::to_json({
+        success => JSON::true,
+        result => {
+            status => $status,
+            objects => $objects,
+        },
+    });
 };
 
 true;
