@@ -209,9 +209,6 @@ sub check_get_all_a {
 
     is($response->{status}, 200, 'Got expected http code');
 
-use Data::Dumper;
-say Dumper $response;
-
     cmp_deeply(
         from_json($response->{content}),
         {
@@ -236,8 +233,8 @@ say Dumper $response;
     return '';
 }
 
-
 sub main_in_test {
+
     pass('Loaded ok');
 
     run_docker();
@@ -261,6 +258,7 @@ sub main_in_test {
     rm_docker();
 
     done_testing();
+
 }
 main_in_test();
 __END__
