@@ -17,6 +17,8 @@ RUN cpanm SQL::Easy
 RUN cpanm Moment
 RUN cpanm lib::abs
 RUN cpanm File::Slurp
+RUN cpanm SQL::Abstract
+RUN cpanm JSON
 
 COPY bin/ /curry/bin/
 COPY lib/ /curry/lib/
