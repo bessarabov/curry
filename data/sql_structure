@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS `history` (
+  `path` varchar(512),
+  `dt` DATETIME NOT NULL,
+  `status` varchar(7),
+  PRIMARY KEY (`path`, `dt`)
+);
+
+CREATE TABLE IF NOT EXISTS `settings` (
+  `path` varchar(512),
+  `type` varchar(512),
+  `value` varchar(512),
+  PRIMARY KEY (`path`, `type`)
+);
