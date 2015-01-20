@@ -35,10 +35,45 @@ sub rm_docker {
     return '';
 }
 
-sub set {
-    my ($path, $status) = @_;
+sub check_fail_without_expire {
+
+    my $path = 'sample';
+    my $status = 'ok';
 
     my $url = "http://$HOST:$PORT/api/1/set?path=$path&status=$status";
+    my $response = HTTP::Tiny->new(
+        default_headers => {
+            'X-Requested-With' => 'XMLHttpRequest',
+        },
+    )->get( $url );
+
+    is($response->{status}, 200, 'Got expected http code');
+
+    is_json(
+        $response->{content},
+        to_json({
+            success => JSON::false,
+            error_message => "You must specify 'expire' for this path",
+        }),
+        'Got expected content',
+    );
+
+    return '';
+}
+
+sub set {
+    my (%params) = @_;
+
+    my $path = delete $params{path};
+    my $status = delete $params{status};
+    my $expire = delete $params{expire};
+
+    my $expire_text = '';
+    if ($expire) {
+        $expire_text = "&expire=$expire";
+    }
+
+    my $url = "http://$HOST:$PORT/api/1/set?path=$path&status=$status$expire_text";
     my $response = HTTP::Tiny->new(
         default_headers => {
             'X-Requested-With' => 'XMLHttpRequest',
@@ -58,7 +93,39 @@ sub set {
     return '';
 }
 
-sub check_get_object_a_1 {
+sub first_check_get_object_a_1 {
+    my $url = "http://$HOST:$PORT/api/1/get_object?path=a.1";
+    my $response = HTTP::Tiny->new(
+        default_headers => {
+            'X-Requested-With' => 'XMLHttpRequest',
+        },
+    )->get( $url );
+
+    is($response->{status}, 200, 'Got expected http code');
+
+    cmp_deeply(
+        from_json($response->{content}),
+        {
+            success => JSON::true,
+            result => {
+                "path" => "a.1",
+                "status" => "ok",
+                "expire" => '4d',
+                "history" => [
+                    {
+                        "dt" => ignore(),
+                        "status" => "ok",
+                    },
+                ]
+            },
+        },
+        'Got expected content',
+    );
+
+    return '';
+}
+
+sub second_check_get_object_a_1 {
     my $url = "http://$HOST:$PORT/api/1/get_object?path=a.1";
     my $response = HTTP::Tiny->new(
         default_headers => {
@@ -75,6 +142,7 @@ sub check_get_object_a_1 {
             result => {
                 "path" => "a.1",
                 "status" => "fail",
+                "expire" => '15m',
                 "history" => [
                     {
                         "dt" => ignore(),
@@ -239,15 +307,17 @@ sub main_in_test {
 
     run_docker();
 
-    set('a.1', 'ok');
+    check_fail_without_expire();
+
+    set( path => 'a.1', status => 'ok', expire => '4d' );
+    first_check_get_object_a_1();
     sleep(1);
-    set('a.1', 'fail');
+    set( path => 'a.1', status => 'fail', expire => '15m' );
+    second_check_get_object_a_1();
 
-    set('a.2', 'ok');
-    set('b.1', 'fail');
-    set('c.1', 'ok');
-
-    check_get_object_a_1();
+    set( path => 'a.2', status => 'ok', expire => '1d');
+    set( path => 'b.1', status => 'fail', expire => '1d');
+    set( path => 'c.1', status => 'ok', expire => '1d');
 
     check_get();
     check_get_all();

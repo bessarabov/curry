@@ -26,6 +26,55 @@ ajax '/api/1/set' => sub {
 
     my $sa = SQL::Abstract->new();
 
+    my $has_expire_setting = get_db()->get_one(
+        "select count(*)
+        from settings
+        where path = ? and type = 'expire'",
+        param('path'),
+    );
+
+    if (defined param('expire')) {
+
+        if ($has_expire_setting) {
+
+            get_db()->execute(
+                $sa->update(
+                    'settings',
+                    {
+                        value => param('expire'),
+                    },
+                    {
+                        path => param('path'),
+                        type => 'expire',
+                    },
+                ),
+            );
+
+        } else {
+
+            get_db()->execute(
+                $sa->insert(
+                    'settings',
+                    {
+                        path => param('path'),
+                        type => 'expire',
+                        value => param('expire'),
+                    }
+                ),
+            );
+
+        }
+
+    } else {
+
+        if (not $has_expire_setting) {
+            return JSON::to_json({
+                 success => JSON::false,
+                 error_message => "You must specify 'expire' for this path",
+            });
+        }
+    }
+
     get_db()->execute(
         $sa->insert(
             'history',
@@ -50,6 +99,11 @@ ajax '/api/1/get_object' => sub {
 
     content_type('application/json');
 
+    my $expire = get_db()->get_one(
+        'select value from settings where path = ? and type = "expire"',
+        param('path'),
+    );
+
     my $data = get_db()->get_data(
         'select dt, status from history where path = ? order by dt',
         param('path'),
@@ -60,6 +114,7 @@ ajax '/api/1/get_object' => sub {
          result => {
             status => $data->[-1]->{status},
             path => param('path'),
+            expire => $expire,
             history => $data,
         }
     });
