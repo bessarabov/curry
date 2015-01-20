@@ -17,14 +17,18 @@ use Curry::DB;
 # main
 sub main {
 
-    my $content = read_file(
-        '/curry/data/sql_structure',
-        {
-            binmode => ':utf8',
-        },
-    );
+    foreach my $name (qw(history settings)) {
 
-    get_db()->execute( $content );
+        my $content = read_file(
+            "/curry/data/sql_structure.$name",
+            {
+                binmode => ':utf8',
+            },
+        );
+
+        get_db()->execute( $content );
+
+    }
 
 }
 main();

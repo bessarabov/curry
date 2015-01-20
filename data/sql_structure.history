@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS `history` (
+  `path` varchar(512),
+  `dt` DATETIME NOT NULL,
+  `status` varchar(7),
+  PRIMARY KEY (`path`, `dt`)
+);
