@@ -22,6 +22,8 @@ get '/' => sub {
 
 ajax '/api/1/set' => sub {
 
+    mark_expired();
+
     content_type('application/json');
 
     my $sa = SQL::Abstract->new();
@@ -97,6 +99,8 @@ ajax '/api/1/set' => sub {
 
 ajax '/api/1/get_object' => sub {
 
+    mark_expired();
+
     content_type('application/json');
 
     my $expire = get_db()->get_one(
@@ -112,7 +116,7 @@ ajax '/api/1/get_object' => sub {
     return JSON::to_json({
          success => JSON::true,
          result => {
-            status => $data->[-1]->{status},
+            status => ($data->[-1]->{status} eq 'ok' ? 'ok' : 'fail'),
             path => param('path'),
             expire => $expire,
             history => $data,
@@ -125,6 +129,8 @@ ajax '/api/1/get_object' => sub {
 =cut
 
 ajax '/api/1/get' => sub {
+
+    mark_expired();
 
     content_type('application/json');
 
@@ -142,6 +148,8 @@ ajax '/api/1/get' => sub {
 =cut
 
 ajax '/api/1/get_all' => sub {
+
+    mark_expired();
 
     content_type('application/json');
 
@@ -205,6 +213,101 @@ sub get_data {
     };
 
     return $result;
+}
+
+sub mark_expired {
+
+    my $settings = get_db()->get_data(
+        'select path, `value` from settings where type = "expire"',
+    );
+
+    my $path2expire = { map { $_->{path} => expire2seconds($_->{value})} @{$settings} };
+#$VAR1 = {
+#          'c.1' => 86400,
+#          'a.1' => 300,
+#          'a.2' => 86400,
+#          'b.1' => 86400,
+#          'd.1' => 1
+#        };
+
+    my $history = get_db()->get_data(
+        "
+        select
+            f.path, f.status, s.max_dt
+        from
+            history f
+        inner join
+            (select max(dt) as max_dt, path from history group by path) s
+            on
+                f.dt = s.max_dt
+                and f.path = s.path
+        order by
+            f.path
+        ",
+    );
+#$VAR1 = [
+#          {
+#            'path' => 'a.1',
+#            'max_dt' => '2015-01-20 09:43:26',
+#            'status' => 'ok'
+#          },
+#          {
+#            'path' => 'a.2',
+#            'status' => 'ok',
+#            'max_dt' => '2015-01-20 09:41:54'
+#          },
+
+    my $sa = SQL::Abstract->new();
+    my $now = Moment->now();
+
+    foreach my $element (@{$history}) {
+
+        my $path = $element->{path};
+
+        my $max_dt_moment = Moment->new( dt => $element->{max_dt} );
+        my $expire_dt_moment = $max_dt_moment->plus( second => $path2expire->{$path} );
+
+        if ( $now->get_timestamp() >= $expire_dt_moment->get_timestamp() ) {
+            if ($element->{status} ne 'unknown') {
+
+                get_db()->execute(
+                    $sa->insert(
+                        'history',
+                        {
+                            path => $path,
+                            status => 'unknown',
+                            dt => $expire_dt_moment->get_dt(),
+                        }
+                    ),
+                );
+            }
+        }
+
+    }
+
+}
+
+sub expire2seconds {
+    my ($expire) = @_;
+
+    croak 'expire is not defined' if not defined $expire;
+
+    my $seconds;
+
+    if ($expire =~ /^([0-9]+)([smhd])$/) {
+        my %multiplier = (
+            s => 1,
+            m => 60,
+            h => 3600,
+            d => 86400,
+        );
+
+        $seconds = $1 * $multiplier{$2};
+    } else {
+        croak sprintf("expire %s is in unknown format", $expire);
+    }
+
+    return $seconds;
 }
 
 true;

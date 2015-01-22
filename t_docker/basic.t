@@ -10,6 +10,7 @@ use JSON;
 use Test::Deep qw(cmp_deeply ignore);
 use Test::JSON;
 use Test::More;
+use Moment;
 
 my $HOST='docker';
 my $PORT=12007;
@@ -301,6 +302,111 @@ sub check_get_all_a {
     return '';
 }
 
+sub check_get_d {
+    my $url = "http://$HOST:$PORT/api/1/get?path=d";
+    my $response = HTTP::Tiny->new(
+        default_headers => {
+            'X-Requested-With' => 'XMLHttpRequest',
+        },
+    )->get( $url );
+
+    is($response->{status}, 200, 'Got expected http code');
+
+    cmp_deeply(
+        from_json($response->{content}),
+        {
+            success => JSON::true,
+            result => {
+                "status" => "fail",
+                "objects" => [
+                    {
+                        "path" => "d.1",
+                        "status" => "unknown",
+                    },
+                ],
+            },
+        },
+        'Got expected content',
+    );
+
+    return '';
+}
+
+sub check_get_all_d {
+    my $url = "http://$HOST:$PORT/api/1/get_all?path=d";
+    my $response = HTTP::Tiny->new(
+        default_headers => {
+            'X-Requested-With' => 'XMLHttpRequest',
+        },
+    )->get( $url );
+
+    is($response->{status}, 200, 'Got expected http code');
+
+    cmp_deeply(
+        from_json($response->{content}),
+        {
+            success => JSON::true,
+            result => {
+                "status" => "fail",
+                "objects" => [
+                    {
+                        "path" => "d.1",
+                        "status" => "unknown"
+                    },
+                ],
+            },
+        },
+        'Got expected content',
+    );
+
+    return '';
+}
+
+sub check_get_object_d_1 {
+    my $url = "http://$HOST:$PORT/api/1/get_object?path=d.1";
+    my $response = HTTP::Tiny->new(
+        default_headers => {
+            'X-Requested-With' => 'XMLHttpRequest',
+        },
+    )->get( $url );
+
+    is($response->{status}, 200, 'Got expected http code');
+
+    my $answer = from_json($response->{content});
+
+    cmp_deeply(
+        $answer,
+        {
+            success => JSON::true,
+            result => {
+                "path" => "d.1",
+                "status" => "fail",
+                "expire" => '1s',
+                "history" => [
+                    {
+                        "dt" => ignore(),
+                        "status" => "ok",
+                    },
+                    {
+                        "dt" => ignore(),
+                        "status" => "unknown",
+                    },
+                ]
+            },
+        },
+        'Got expected content',
+    );
+
+    my $delta_seconds =
+        Moment->new( dt => $answer->{result}->{history}->[1]->{dt} )->get_timestamp()
+        - Moment->new( dt => $answer->{result}->{history}->[0]->{dt} )->get_timestamp()
+        ;
+
+    is( $delta_seconds, 1, '2 moments in history differ for 1 second' );
+
+    return '';
+}
+
 sub main_in_test {
 
     pass('Loaded ok');
@@ -324,6 +430,12 @@ sub main_in_test {
 
     check_get_a();
     check_get_all_a();
+
+    set( path => 'd.1', status => 'ok', expire => '1s');
+    sleep(2);
+    check_get_d();
+    check_get_all_d();
+    check_get_object_d_1();
 
     rm_docker();
 
