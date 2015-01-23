@@ -36,6 +36,30 @@ sub rm_docker {
     return '';
 }
 
+sub check_version {
+    my $url = "http://$HOST:$PORT/api/1/version";
+    my $response = HTTP::Tiny->new(
+        default_headers => {
+            'X-Requested-With' => 'XMLHttpRequest',
+        },
+    )->get( $url );
+
+    is($response->{status}, 200, 'Got expected http code');
+
+    cmp_deeply(
+        from_json($response->{content}),
+        {
+            success => JSON::true,
+            result => {
+                version => ignore(),
+            },
+        },
+        'Got expected content from "version"',
+    );
+
+    return '';
+}
+
 sub check_fail_without_expire {
 
     my $path = 'sample';
@@ -412,6 +436,8 @@ sub main_in_test {
     pass('Loaded ok');
 
     run_docker();
+
+    check_version();
 
     check_fail_without_expire();
 

@@ -16,6 +16,23 @@ get '/' => sub {
     return 'Hello, world';
 };
 
+=head2 /api/1/version
+
+=cut
+
+ajax '/api/1/version' => sub {
+
+    content_type('application/json');
+
+    return JSON::to_json({
+        success => JSON::true,
+        result => {
+            version => 'dev-1',
+        },
+    });
+};
+
+
 =head2 /api/1/set
 
 =cut
