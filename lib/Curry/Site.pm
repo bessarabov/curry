@@ -12,6 +12,29 @@ use lib::abs qw(
 );
 use Curry::DB;
 
+hook 'before' => sub {
+
+    if ($ENV{TOKEN}) {
+
+        my $auth = request->{headers}->{authorization} // '';
+        $auth =~ /^TOKEN key="(.*?)"$/;
+        my $got_token = $1 // '';
+
+        if ( $ENV{TOKEN} eq $got_token ) {
+            # auth is correct
+        } else {
+            content_type('application/json');
+
+            my $content = JSON::to_json({
+                success => JSON::false,
+                error_message => 'No access',
+            });
+
+            return halt($content);
+        }
+    }
+};
+
 get '/' => sub {
     return 'Hello, world';
 };
