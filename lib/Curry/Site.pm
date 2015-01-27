@@ -62,6 +62,20 @@ ajax '/api/1/version' => sub {
 
 ajax '/api/1/set' => sub {
 
+    if (not defined param('path')) {
+        return JSON::to_json({
+             success => JSON::false,
+             error_message => "You must specify 'path'",
+        });
+    }
+
+    if (not is_path_valid(param('path'))) {
+        return JSON::to_json({
+             success => JSON::false,
+             error_message => sprintf("Incorrect value for 'path': '%s'", param('path')),
+        });
+    }
+
     if (not defined param('status')) {
         return JSON::to_json({
              success => JSON::false,
@@ -362,6 +376,20 @@ sub expire2seconds {
     }
 
     return $seconds;
+}
+
+sub is_path_valid {
+    my ($path) = @_;
+
+    my @elements = split(/\./, $path, -1);
+    return 0 if @elements == 0;
+
+    foreach (@elements) {
+        return 0 if $_ eq '';
+        return 0 if $_ !~ m/^[a-z0-9_]+$/;
+    }
+
+    return 1;
 }
 
 true;
