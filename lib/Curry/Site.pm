@@ -62,6 +62,20 @@ ajax '/api/1/version' => sub {
 
 ajax '/api/1/set' => sub {
 
+    if (not defined param('status')) {
+        return JSON::to_json({
+             success => JSON::false,
+             error_message => "You must specify 'status'",
+        });
+    }
+
+    if (not grep {$_ eq 'ok' or $_ eq 'fail'} param('status')) {
+        return JSON::to_json({
+             success => JSON::false,
+             error_message => sprintf("Incorrect value for 'status': '%s'", param('status')),
+        });
+    }
+
     mark_expired();
 
     content_type('application/json');
