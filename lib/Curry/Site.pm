@@ -105,6 +105,13 @@ ajax '/api/1/set' => sub {
 
     if (defined param('expire')) {
 
+        if (not is_expire_valid(param('expire'))) {
+            return JSON::to_json({
+                 success => JSON::false,
+                 error_message => sprintf("Incorrect value for 'expire': '%s'", param('expire')),
+            });
+        }
+
         if ($has_expire_setting) {
 
             get_db()->execute(
@@ -390,6 +397,16 @@ sub is_path_valid {
     }
 
     return 1;
+}
+
+sub is_expire_valid {
+    my ($expire) = @_;
+
+    if ($expire =~ /^([0-9]+)([smhd])$/) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 true;

@@ -209,6 +209,29 @@ sub check_correct_path {
     return '';
 }
 
+sub check_incorrect_expire {
+    my ($expire) = @_;
+    my $url = "http://$HOST:$PORT/api/1/set?path=test&status=ok&expire=$expire";
+    my $response = HTTP::Tiny->new(
+        default_headers => {
+            'X-Requested-With' => 'XMLHttpRequest',
+        },
+    )->get( $url );
+
+    is($response->{status}, 200, "Got expected http code for expire '$expire'");
+
+    cmp_deeply(
+        from_json($response->{content}),
+        {
+            success => JSON::false,
+            error_message => "Incorrect value for 'expire': '$expire'",
+        },
+        "Got expected content for expire '$expire'",
+    );
+
+    return '';
+}
+
 sub main_in_test {
 
     pass('Loaded ok');
@@ -232,6 +255,11 @@ sub main_in_test {
     check_correct_path('__');
     check_correct_path('aaa');
     check_correct_path('aaa.bbb');
+
+    check_incorrect_expire('.');
+    check_incorrect_expire('a');
+    check_incorrect_expire('79y');
+    check_incorrect_expire('never');
 
     rm_docker();
 
