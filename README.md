@@ -43,7 +43,59 @@ is lost. Please read the next section if you need to have persistent storage.
 
 ## How can I run curry with persistent storage?
 
+Docker container with curry has sqlite file. All the data that is stored in
+curry is stored in that database file. When you delete container that file
+is deleted (as it is situated in the container). To make the storage
+persistent you need to place that file outsite the docker.
+
+First of all you need to [Docker to be installed](https://docs.docker.com/installation/).
+
+Then you should pull the image:
+
+    docker pull bessarabov/curry
+
+When you have a curry image you can use this commands to copy sqlite file
+from the container to your local computer:
+
+    docker run --detach --name tmp_curry bessarabov/curry
+    docker cp tmp_curry:/curry/data/db.sqlite .
+    docker rm -f tmp_curry
+
+Next you should place db.sqlite to some handy path and run curry mounting
+that path to the container. For example if you have placed db.sqlite to
+/docker/curry you need to run:
+
+    docker run --volume /docker/curry/:/curry/data/ --publish 15000:3000 bessarabov/curry
+
+This will start curry at port 15000 and it will use database file from your
+host computer.
+
 ## How can I run curry with authorization?
+
+By default curry has no authorization. Eveybody who has full access to the
+curry.
+
+Sometimes you need to limit the access. To do it you should pass environment
+variable TOKEN when running docker. Here is an example:
+
+    docker run --publish 15000:3000 -e 'TOKEN=3qagL6jllc' bessarabov/curry
+
+One will not be able to access curry the standard way:
+
+    curl -H "X-Requested-With: XMLHttpRequest" "http://curry:15000/api/1/get"
+
+It will return error:
+
+    {"error_message":"No access","success":false}
+
+To access curry you need to specify that token:
+
+    curl \
+        -H "X-Requested-With: XMLHttpRequest" \
+        -H 'Authorization: TOKEN key="3qagL6jllc"' \
+        "http://curry:15000/api/1/get"
+
+And be sure to run curry with persistent storage.
 
 ## List of API endpoints
 
