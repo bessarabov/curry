@@ -97,6 +97,55 @@ To access curry you need to specify that token:
 
 And be sure to run curry with persistent storage.
 
+## API
+
+Curry is a webserver. There are several endpoints that you can access. Here
+is an example:
+
+    curl \
+        -H "X-Requested-With: XMLHttpRequest" \
+        "http://curry:15000/api/1/version"
+
+Here is the answer (the JSON was prettified):
+
+    {
+        "success" : true,
+        "result" : {
+            "version" : "1.0.0"
+        }
+    }
+
+All API endpoints alwasys return unpretty JSON. All the answers have the same
+structure:
+
+    {
+        "success" : true,
+        "result" : ...
+    }
+
+The value "result" can be any valid JSON value: string, number, object,
+array, true, false, null. The value of "result" differ for different
+endpoints.
+
+Here is the sample JSON in case of error:
+
+    {
+        "success" : false,
+        "error_message" : "Incorrect value for 'path': 'sample path'"
+    }
+
+The "error_message" is human readable description of the error.
+
+So, all API endpoints must return JSON. If the endpoint returns not valid
+JSON, this means error. The JSON is always an object that hase name
+"success". If "success" is a true value then the API request finished
+successfully. If the value of "success" is false, this means error and the
+description of the error will be in "error_message".
+
+The API is versioned with [SemVer](http://semver.org/). The number in the url
+is the Major version of the curry version. Number of API bumps up when the
+incompatible API change is made.
+
 ## List of API endpoints
 
 ### set
