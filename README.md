@@ -125,7 +125,7 @@ structure:
 
 The value "result" can be any valid JSON value: string, number, object,
 array, true, false, null. The value of "result" differ for different
-endpoints.
+endpoints. And "result" is optional.
 
 Here is the sample JSON in case of error:
 
@@ -149,6 +149,41 @@ incompatible API change is made.
 ## List of API endpoints
 
 ### set
+
+With the endpoint "set" you record information about state of the object. You
+must specify 2 parameters:
+
+ * path
+ * status
+
+Parameter "path" consists of one or more element. Each element is a string
+that should match regular exspression [a-z0-9_]+ Elements are separated with
+dots. Some examples of valid paths: "aa", "site", "jenkins.job_1"
+
+Parameter "status" can be "ok" or "fail".
+
+When you execute this endpoint with new "path" you must also specify
+paramenter "expire". Parameter expire must match regular exspression
+[0-9]+[smhd] The meaning of "expire" is in how much time from the last "ok"
+or "fail" the object status will be changed to "unknown". The meaning of
+postfixes:
+
+ * s — second
+ * m — minute
+ * h — hour
+ * d — day
+
+Sample usage:
+
+    curl \
+        -H "X-Requested-With: XMLHttpRequest" \
+        "http://curry:15000/api/1/set?path=aa&status=ok&expire=1d"
+
+It will return:
+
+    {
+        "success" : true
+    }
 
 ### get
 
