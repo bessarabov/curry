@@ -50,7 +50,7 @@ ajax '/api/1/version' => sub {
     return JSON::to_json({
         success => JSON::true,
         result => {
-            version => 'dev-2',
+            version => '1.0.0',
         },
     });
 };

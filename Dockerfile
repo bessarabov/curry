@@ -1,6 +1,6 @@
 FROM ubuntu:14.04
 
-ENV UPDATED_AT 2015-01-15
+ENV UPDATED_AT 2015-02-01
 
 RUN apt-get update
 
