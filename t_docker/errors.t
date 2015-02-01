@@ -254,6 +254,28 @@ sub get_object_no_path {
     return '';
 }
 
+sub get_object_unknown_path {
+    my $url = "http://$HOST:$PORT/api/1/get_object?path=no_such_path";
+    my $response = HTTP::Tiny->new(
+        default_headers => {
+            'X-Requested-With' => 'XMLHttpRequest',
+        },
+    )->get( $url );
+
+    is($response->{status}, 200, 'Got expected http code');
+
+    cmp_deeply(
+        from_json($response->{content}),
+        {
+            success => JSON::false,
+            error_message => "Parameter 'path' got unknown value 'no_such_path'",
+        },
+        'Got expected content',
+    );
+
+    return '';
+}
+
 sub main_in_test {
 
     pass('Loaded ok');
@@ -284,6 +306,7 @@ sub main_in_test {
     check_incorrect_expire('never');
 
     get_object_no_path();
+    get_object_unknown_path();
 
     rm_docker();
 

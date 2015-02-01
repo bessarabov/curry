@@ -202,6 +202,13 @@ ajax '/api/1/get_object' => sub {
         param('path'),
     );
 
+    if (@{$data} == 0) {
+        return JSON::to_json({
+             success => JSON::false,
+             error_message => sprintf("Parameter 'path' got unknown value '%s'", param('path')),
+        });
+    }
+
     return JSON::to_json({
          success => JSON::true,
          result => {
