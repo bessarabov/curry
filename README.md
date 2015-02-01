@@ -324,8 +324,50 @@ It will return:
 
 ### Why I need to specify X-Requested-With header?
 
+This is a security issue. This heades has beed added to prevent
+[CSRF attacks](http://en.wikipedia.org/wiki/Cross-site_request_forgery).
+
+If there was no such header the attacker could add such code on his site:
+
+    <img src="http://curry:15000/api/1/set?path=aa&status=ok"/>
+
+And if you go to that site that it will change she status of the object. To
+prevent such situation the header was made obligatory.
+
 ### How can I run curry with https?
+
+This is simple. You run curry with docker on some port on localhost and have
+nginx (or other web server) that serves https sitet, but passes all requests
+to that localhost port.
 
 ### What is the future of this project?
 
+For now this project works super well for my purposes. I was thinking about
+several things that is good to add to this project, but I don't need that
+features heavily. If you need one of this feature or you have any other
+feature requests, please write and comment and [GitHub Issues of this
+project](https://github.com/bessarabov/curry/issues). Writing at GitHub
+will speed up the addition of the features.
+
+Here is the list of features that I think is good to add to this project:
+
+ * endpoint "delete" to delete obsolete objects
+ * the ability to specify "never" as "expire" in "set" endpoints
+ * the ability to use MySQL as the database
+ * the ability to specify how many elements will be stored in history (to
+   prevent database of getting very big)
+ * hooks — curry could make some http request when the status of the object
+   changes
+ * make it possible to specify some key-value for every execution of "set"
+   endpoint (this can be used to specify some descriptions, for example one
+   could set "html" key that has the value of text describing the error in
+   detail).
+
 ### How can I build docker image myself?
+
+The docker images is build automatically at [Docker Hub](https://registry.hub.docker.com/u/bessarabov/curry/)
+but it is pretty easy to build the image yourself:
+
+    git clone https://github.com/bessarabov/curry.git
+    cd curry
+    docker build --tag curry .
