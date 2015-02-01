@@ -174,6 +174,20 @@ ajax '/api/1/set' => sub {
 
 ajax '/api/1/get_object' => sub {
 
+    if (not defined param('path')) {
+        return JSON::to_json({
+             success => JSON::false,
+             error_message => "You must specify 'path'",
+        });
+    }
+
+    if (not is_path_valid(param('path'))) {
+        return JSON::to_json({
+             success => JSON::false,
+             error_message => sprintf("Incorrect value for 'path': '%s'", param('path')),
+        });
+    }
+
     mark_expired();
 
     content_type('application/json');
