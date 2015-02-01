@@ -97,6 +97,13 @@ To access curry you need to specify that token:
 
 And be sure to run curry with persistent storage.
 
+## Statuses
+
+Object in curry has a status. It can be 'ok', 'fail' or 'unknown'. Statuses
+'ok' and 'fail' are set manually with API endpoint 'set'. Status 'unknown' is
+set to the object automatically when the date of the last 'ok'/'fail' differ
+from the current date for the value of 'expire'.
+
 ## API
 
 Curry is a webserver. There are several endpoints that you can access. Here
