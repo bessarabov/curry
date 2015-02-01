@@ -187,11 +187,138 @@ It will return:
 
 ### get
 
+Endpoint "get" gives you information of all failed object.
+
+    curl \
+        -H "X-Requested-With: XMLHttpRequest" \
+        "http://curry:15000/api/1/get"
+
+It will return:
+
+    {
+        "success" : true,
+        "result" : {
+            "status" : "fail",
+            "objects" : [
+                {
+                    "path" : "bb",
+                    "status" : "fail"
+                },
+                {
+                    "path" : "jenkins.job_1",
+                    "status" : "fail"
+                }
+            ]
+        }
+    }
+
+You can limit the data that "get" returns with the optional parameter "path":
+
+    curl \
+        -H "X-Requested-With: XMLHttpRequest" \
+        "http://curry:15000/api/1/get?path=jenkins"
+
+In this example I userd "jenkins" as the value for "path". Such usage will
+return all failing objects that has the path starting with "jenkins." and the
+"jenkins" object.
+
+    {
+        "success" : true,
+        "result" : {
+            "status" : "fail",
+            "objects" : [
+                {
+                    "path" : "jenkins.job_1",
+                    "status" : "fail"
+                }
+            ]
+        }
+    }
+
 ### get_all
+
+The endpoint "get_all" works exactly as "get", but it returns all the object.
+
+    curl \
+        -H "X-Requested-With: XMLHttpRequest" \
+        "http://curry:15000/api/1/get_all"
+
+Here is the example output of this endpoint:
+
+    {
+        "success" : true,
+        "result" : {
+            "status" : "fail",
+            "objects" : [
+                {
+                    "path" : "aa",
+                    "status" : "ok"
+                },
+                {
+                    "status" : "fail",
+                    "path" : "bb"
+                },
+                {
+                    "path" : "jenkins.job_1",
+                    "status" : "fail"
+                },
+                {
+                    "status" : "ok",
+                    "path" : "jenkins.job_2"
+                }
+            ]
+        }
+    }
+
+Endpoint "get_all" can get optional parameter "path". It works exactly as
+in "get" endpoint.
 
 ### get_object
 
+Endpoint "get_object" returns all avaliable information about one object.
+You must specify parameter "path":
+
+    curl \
+        -H "X-Requested-With: XMLHttpRequest" \
+        "http://curry:15000/api/1/get_object?path=aa"
+
+It will return:
+
+    {
+        "success" : true,
+        "result" : {
+            "path" : "aa",
+            "status" : "ok",
+            "expire" : "1d",
+            "history" : [
+                {
+                    "status" : "ok",
+                    "dt" : "2015-01-22 06:33:57"
+                },
+                {
+                    "status" : "ok",
+                    "dt" : "2015-01-22 06:40:14"
+                }
+            ]
+        }
+    }
+
 ### version
+
+Endpoint "version" return the version of the curry system.
+
+    curl \
+        -H "X-Requested-With: XMLHttpRequest" \
+        "http://curry:15000/api/1/version"
+
+It will return:
+
+    {
+        "success" : true,
+        "result" : {
+            "version" : "1.0.0"
+        }
+    }
 
 ## FAQ
 
