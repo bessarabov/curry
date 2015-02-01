@@ -36,7 +36,7 @@ hook 'before' => sub {
 };
 
 get '/' => sub {
-    return 'Hello, world';
+    return '<a href="https://github.com/bessarabov/curry">curry</a>';
 };
 
 =head2 /api/1/version
