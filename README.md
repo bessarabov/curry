@@ -370,6 +370,19 @@ Here is the list of features that I think is good to add to this project:
    could set "html" key that has the value of text describing the error in
    detail).
 
+And there are several things that should be changed in this project:
+
+ * Make API more RESTfull — now every endpoint works with GET and POST. We
+   should make 'set' work only with POST and all the endpoints that return
+   data to work with GET. This is backwards-incompatible change, so the major
+   version in SemVer should be bumped.
+ * Now every endpoint has must get 'X-Requested-With' header. But actually
+   it is needed only for endpoints that changes data (now there is only one
+   endpoint 'set'). So we should remove the need of this header for all
+   endpoints that just return data ('get', 'get_all', 'get_object',
+   'version'). This is backwards-incompatible change, so the major version in
+   SemVer should be bumped.
+
 ### How can I build docker image myself?
 
 The docker images is build automatically at [Docker Hub](https://registry.hub.docker.com/u/bessarabov/curry/)
