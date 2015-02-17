@@ -32,7 +32,7 @@ First you need to [install Docker](https://docs.docker.com/installation/).
 
 The second (and the last thing) that you need to do is to run the command:
 
-    docker run --publish 15000:3000 bessarabov/curry
+    docker run --publish 15000:3000 bessarabov/curry:1.0.0
 
 It will download image from [Docker Hub](https://registry.hub.docker.com/u/bessarabov/curry/)
 and it will create working instance on port 15000.
@@ -52,12 +52,12 @@ First of all you need to [Docker to be installed](https://docs.docker.com/instal
 
 Then you should pull the image:
 
-    docker pull bessarabov/curry
+    docker pull bessarabov/curry:1.0.0
 
 When you have a curry image you can use this commands to copy sqlite file
 from the container to your local computer:
 
-    docker run --detach --name tmp_curry bessarabov/curry
+    docker run --detach --name tmp_curry bessarabov/curry:1.0.0
     docker cp tmp_curry:/curry/data/db.sqlite .
     docker rm -f tmp_curry
 
@@ -65,7 +65,7 @@ Next you should place db.sqlite to some handy path and run curry mounting
 that path to the container. For example if you have placed db.sqlite to
 /docker/curry you need to run:
 
-    docker run --volume /docker/curry/:/curry/data/ --publish 15000:3000 bessarabov/curry
+    docker run --volume /docker/curry/:/curry/data/ --publish 15000:3000 bessarabov/curry:1.0.0
 
 This will start curry at port 15000 and it will use database file from your
 host computer.
@@ -78,7 +78,7 @@ curry.
 Sometimes you need to limit the access. To do it you should pass environment
 variable TOKEN when running docker. Here is an example:
 
-    docker run --publish 15000:3000 -e 'TOKEN=3qagL6jllc' bessarabov/curry
+    docker run --publish 15000:3000 -e 'TOKEN=3qagL6jllc' bessarabov/curry:1.0.0
 
 One will not be able to access curry the standard way:
 
