@@ -391,3 +391,16 @@ but it is pretty easy to build the image yourself:
     git clone https://github.com/bessarabov/curry.git
     cd curry
     docker build --tag curry .
+
+### How to make new release?
+
+This is information for developers of this project. It is a checklist to be
+done when releasing new version.
+
+ * Make the changes to the code
+ * Find out what SemVer version should be used for new release
+ * Change the docs to use new SemVer version number
+ * Add list of changes to the Changes file
+ * Add git tag
+ * Push to GitHub
+ * Add new tag to the automated build at Docker Hub
