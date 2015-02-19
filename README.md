@@ -404,3 +404,8 @@ done when releasing new version.
  * Add git tag
  * Push to GitHub
  * Add new tag to the automated build at Docker Hub
+
+## Publications
+
+ * http://blogs.perl.org/users/ivan_bessarabov/2015/02/using-perl-dancer-and-docker-to-create-simple-monitoring-system.html
+ * https://ivan.bessarabov.ru/blog/curry-monitoring (in Russian language)
