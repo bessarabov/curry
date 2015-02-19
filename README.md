@@ -382,6 +382,13 @@ And there are several things that should be changed in this project:
    endpoints that just return data ('get', 'get_all', 'get_object',
    'version'). This is backwards-incompatible change, so the major version in
    SemVer should be bumped.
+ * Review all the http statuses the endpionts return (especially the
+   situations with errors) and change in case something is not consistent
+ * Check the situation when you use 'set' endpoint and change only 'expire'
+   paramter of the object. Make sure that it works as expected when this
+   changes the status of the object to 'unknown'
+ * Make sure that the system works in the situation when somebody specifies
+   very big value for expire (for example '10000000000000d')
 
 ### How can I build docker image myself?
 
