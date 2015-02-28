@@ -405,6 +405,7 @@ This is information for developers of this project. It is a checklist to be
 done when releasing new version.
 
  * Make the changes to the code
+ * Run tests `time docker build --tag curry .; prove t_docker/`
  * Find out what SemVer version should be used for new release
  * Change the docs to use new SemVer version number
  * Add list of changes to the Changes file
